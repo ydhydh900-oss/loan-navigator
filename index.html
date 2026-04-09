@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>전세대출 네비게이터</title>
+<title>정책자금 대출 네비게이터</title>
+<meta name="description" content="전세대출·주담대 정책자금 맞춤 안내 서비스">
+<meta name="theme-color" content="#1a56db">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="대출네비">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -289,7 +296,151 @@
 
   .back-btn:hover { color: var(--primary); }
 
-  /* ====== COUPANG SCREEN ====== */
+  /* PWA 설치 배너 */
+  .pwa-banner {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 440px;
+    background: var(--gray-900);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    z-index: 999;
+    box-shadow: var(--shadow-lg);
+    align-items: center;
+    gap: 12px;
+  }
+
+  .pwa-banner.show { display: flex; }
+
+  .pwa-banner-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+
+  .pwa-banner-text { flex: 1; }
+
+  .pwa-banner-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .pwa-banner-desc {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.4;
+  }
+
+  .pwa-banner-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+
+  .pwa-install-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .pwa-dismiss-btn {
+    background: none;
+    color: rgba(255,255,255,0.5);
+    border: none;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+  }
+
+  /* iOS 설치 안내 모달 */
+  .ios-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .ios-modal.show { display: flex; }
+
+  .ios-modal-box {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    width: 100%;
+    max-width: 440px;
+    text-align: center;
+  }
+
+  .ios-modal-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--gray-900);
+    margin-bottom: 16px;
+  }
+
+  .ios-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-100);
+    text-align: left;
+  }
+
+  .ios-step:last-of-type { border-bottom: none; }
+
+  .ios-step-num {
+    width: 26px;
+    height: 26px;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .ios-step-text {
+    font-size: 13px;
+    color: var(--gray-700);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .ios-modal-close {
+    margin-top: 16px;
+    width: 100%;
+    background: var(--gray-100);
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-600);
+    cursor: pointer;
+    font-family: inherit;
+  }
   .coupang-screen {
     text-align: center;
     padding: 40px 24px;
@@ -413,18 +564,22 @@
     color: var(--primary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
   }
 
-  .highlight-box .hl-value {
+  .highlight-box .hl-product {
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--gray-900);
-    line-height: 1.5;
+    line-height: 1.4;
+    margin-bottom: 3px;
   }
 
-  .highlight-box .hl-value strong {
-    color: var(--primary);
+  .highlight-box .hl-detail {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--primary-dark);
+    line-height: 1.5;
   }
 
   /* Disclaimer */
@@ -746,8 +901,8 @@
 
   <!-- Header -->
   <div class="app-header">
-    <div class="header-label">정책자금 대출 가이드</div>
-    <div class="header-title">🏠 전세대출 네비게이터</div>
+    <div class="header-label" id="headerLabel">정책자금 대출 가이드</div>
+    <div class="header-title" id="headerTitle">🏠 정책자금 대출 네비게이터</div>
     <div class="progress-bar">
       <div class="progress-fill" id="progressFill" style="width:0%"></div>
     </div>
@@ -775,15 +930,202 @@
       <div class="option-arrow">›</div>
     </button>
 
-    <button class="option-card disabled-card">
+    <button class="option-card" onclick="selectLoanType('joodam')">
       <div class="option-icon">🏗️</div>
       <div class="option-content">
-        <div class="option-title">주택담보대출 <span style="font-size:12px;font-weight:500;color:var(--gray-400)">(아직 준비중이에요)</span></div>
-        <div class="option-desc">디딤돌, 신생아 특례 구입자금 등<br>정책자금 주담대를 준비하고 있어요</div>
-        <span class="tag-warning">🔧 준비중</span>
+        <div class="option-title">주택담보대출</div>
+        <div class="option-desc">디딤돌, 보금자리론 등<br>정책자금 주담대를 안내해드려요</div>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+  </div>
+
+  <!-- ======= 주담대 STEP 1: 주택 수 ======= -->
+  <div class="screen" id="screen-jd-housing">
+    <button class="back-btn" onclick="showScreen('screen-intro'); resetProgress();">‹ 이전으로</button>
+    <div class="step-badge">📋 STEP 1</div>
+    <div class="screen-title">현재 보유하신<br>주택은 몇 채인가요?</div>
+    <div class="screen-subtitle">디딤돌·보금자리론은 무주택자 또는 1주택자가 대상이에요</div>
+
+    <button class="option-card" onclick="selectJdHousing(0)">
+      <div class="option-icon">🏢</div>
+      <div class="option-content">
+        <div class="option-title">무주택자</div>
+        <div class="option-desc">현재 보유 주택이 없어요</div>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+
+    <button class="option-card" onclick="selectJdHousing(1)">
+      <div class="option-icon">🏠</div>
+      <div class="option-content">
+        <div class="option-title">1주택자</div>
+        <div class="option-desc">주택 1채 보유 중 (보금자리론만 가능, 3년 내 처분 조건)</div>
+        <span class="tag-warning">⚠️ 보금자리론만 가능</span>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+
+    <button class="option-card disabled-card">
+      <div class="option-icon">🏘️</div>
+      <div class="option-content">
+        <div class="option-title">2주택 이상</div>
+        <div class="option-desc">주택 2채 이상 보유</div>
+        <span class="tag-danger">🚫 정책자금 주담대 이용 불가</span>
       </div>
     </button>
   </div>
+
+  <!-- ======= 주담대 STEP 2: 소득 ======= -->
+  <div class="screen" id="screen-jd-income">
+    <button class="back-btn" onclick="goBackJd('screen-jd-housing', 1)">‹ 이전으로</button>
+    <div class="step-badge">💰 STEP 2</div>
+    <div class="screen-title">부부합산 연소득이<br>어느 구간인가요?</div>
+    <div class="screen-subtitle">소득 구간에 따라 이용 가능한 상품이 달라져요</div>
+
+    <button class="option-card" onclick="selectJdIncome(1)">
+      <div class="option-icon">1️⃣</div>
+      <div class="option-content">
+        <div class="option-title">6천만원 이하</div>
+        <div class="option-desc">디딤돌 + 보금자리론 모두 가능</div>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+
+    <button class="option-card" onclick="selectJdIncome(2)">
+      <div class="option-icon">2️⃣</div>
+      <div class="option-content">
+        <div class="option-title">6천만원 초과 ~ 7천만원 이하</div>
+        <div class="option-desc">보금자리론 + 특이사항 따라 디딤돌 가능</div>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+
+    <button class="option-card" onclick="selectJdIncome(3)">
+      <div class="option-icon">3️⃣</div>
+      <div class="option-content">
+        <div class="option-title">7천만원 초과 ~ 8천 5백만원 이하</div>
+        <div class="option-desc">보금자리론 + 신혼·신생아 조건 시 디딤돌 가능</div>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+
+    <button class="option-card" onclick="selectJdIncome(4)">
+      <div class="option-icon">4️⃣</div>
+      <div class="option-content">
+        <div class="option-title">8천 5백만원 초과 ~ 1억원 이하</div>
+        <div class="option-desc">보금자리론 + 신생아 조건 시 특례 디딤돌 가능</div>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+
+    <button class="option-card" onclick="selectJdIncome(5)">
+      <div class="option-icon">5️⃣</div>
+      <div class="option-content">
+        <div class="option-title">1억원 초과 ~ 1억 3천만원 이하</div>
+        <div class="option-desc">신생아 특례 디딤돌만 가능 (신생아 없으면 불가)</div>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+
+    <button class="option-card" onclick="selectJdIncome(6)">
+      <div class="option-icon">6️⃣</div>
+      <div class="option-content">
+        <div class="option-title">1억 3천만원 초과 ~ 2억원 이하</div>
+        <div class="option-desc">맞벌이 신생아 특례 디딤돌만 가능</div>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+
+    <button class="option-card" onclick="selectJdIncome(7)">
+      <div class="option-icon">7️⃣</div>
+      <div class="option-content">
+        <div class="option-title">2억원 초과</div>
+        <div class="option-desc">정책자금 주담대 이용 불가</div>
+        <span class="tag-danger">🚫 정책자금 대상 초과</span>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+  </div>
+
+  <!-- ======= 주담대 STEP 3: 특이사항 ======= -->
+  <div class="screen" id="screen-jd-special">
+    <button class="back-btn" onclick="goBackJd('screen-jd-income', 2)">‹ 이전으로</button>
+    <div class="step-badge">⭐ STEP 3</div>
+    <div class="screen-title">아래 조건 중<br>해당되는 항목을 선택해주세요</div>
+    <div class="screen-subtitle">해당 조건에 따라 한도와 금리가 달라질 수 있어요</div>
+
+    <button class="option-card" onclick="selectJdSpecial(1)">
+      <div class="option-icon">✅</div>
+      <div class="option-content">
+        <div class="option-title">해당없음 (일반)</div>
+        <div class="option-desc">특별 조건이 없어요</div>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+
+    <button class="option-card" onclick="selectJdSpecial(2)">
+      <div class="option-icon">🌟</div>
+      <div class="option-content">
+        <div class="option-title">생애최초 주택구입자</div>
+        <div class="option-desc">평생 처음으로 주택을 구입해요</div>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+
+    <button class="option-card" onclick="selectJdSpecial(3)">
+      <div class="option-icon">💑</div>
+      <div class="option-content">
+        <div class="option-title">신혼부부 (혼인 7년 이내)</div>
+        <div class="option-desc">결혼 후 7년 이내 또는 결혼 예정</div>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+
+    <button class="option-card" onclick="selectJdSpecial(4)">
+      <div class="option-icon">👶</div>
+      <div class="option-content">
+        <div class="option-title">신생아 출산가구 (2년 이내)</div>
+        <div class="option-desc">최근 2년 이내 출산한 가구</div>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+
+    <button class="option-card" onclick="selectJdSpecial(5)">
+      <div class="option-icon">👨‍👩‍👧‍👦</div>
+      <div class="option-content">
+        <div class="option-title">다자녀 가구 (2자녀 이상)</div>
+        <div class="option-desc">미성년 자녀가 2명 이상이에요</div>
+      </div>
+      <div class="option-arrow">›</div>
+    </button>
+  </div>
+
+  <!-- ======= 주담대 쿠팡 ======= -->
+  <div class="screen" id="screen-jd-coupang" style="display:none!important">
+    <div class="coupang-screen">
+      <div class="coupang-icon">🛍️</div>
+      <div class="coupang-title">잠깐! 결과 확인 전</div>
+      <div class="coupang-desc">
+        아래 쿠팡 링크를 방문한 후<br>
+        <strong>결과 확인하기</strong> 버튼을 눌러주세요!<br><br>
+        소소한 응원이 서비스 운영에 큰 힘이 돼요 🙏
+      </div>
+      <a href="https://link.coupang.com/a/edUi04" target="_blank" class="coupang-btn" onclick="enableJdResult()">
+        🛒 쿠팡 바로가기
+      </a>
+      <button class="result-confirm-btn" id="jdResultConfirmBtn" onclick="showJdResult()" disabled style="opacity:0.4;cursor:not-allowed;">
+        ✅ 쿠팡 다녀왔어요! 결과 보기
+      </button>
+      <div class="coupang-notice">
+        ※ 쿠팡 링크 방문 후 결과 확인 버튼이 활성화돼요<br>
+        ※ 이 링크는 파트너스 활동의 일환으로 수익이 발생할 수 있어요
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= 주담대 결과 ======= -->
+  <div class="screen" id="screen-jd-result"></div>
 
   <!-- ======= STEP 1: 주택 수 ======= -->
   <div class="screen" id="screen-housing">
@@ -936,7 +1278,7 @@
   </div>
 
   <!-- ======= COUPANG SCREEN ======= -->
-  <div class="screen" id="screen-coupang">
+  <div class="screen" id="screen-coupang" style="display:none!important">
     <div class="coupang-screen">
       <div class="coupang-icon">🛍️</div>
       <div class="coupang-title">잠깐! 결과 확인 전</div>
@@ -970,8 +1312,389 @@ let state = { housing: null, income: null, age: null, special: null };
 function selectLoanType(type) {
   if (type === 'jeonse') {
     updateProgress(1);
+    document.getElementById('headerTitle').textContent = '🏠 전세대출 네비게이터';
     showScreen('screen-housing');
+  } else if (type === 'joodam') {
+    document.getElementById('headerTitle').textContent = '🏗️ 주담대 네비게이터';
+    updateProgressJd(1);
+    showScreen('screen-jd-housing');
   }
+}
+
+// ===== 주담대 state =====
+let jdState = { housing: null, income: null, special: null };
+
+function updateProgressJd(step) {
+  const pcts = [25, 50, 75, 100];
+  document.getElementById('progressFill').style.width = pcts[step-1] + '%';
+  const labels = ['ps1','ps2','ps3','ps4','ps5'];
+  // 주담대는 4단계: 주택수/소득/특이사항/결과
+  labels.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', i < step);
+  });
+}
+
+function resetProgress() {
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('headerTitle').textContent = '🏠 정책자금 대출 네비게이터';
+}
+
+function goBackJd(screenId, step) {
+  showScreen(screenId);
+  updateProgressJd(step);
+}
+
+function selectJdHousing(n) {
+  jdState.housing = n;
+  updateProgressJd(2);
+  showScreen('screen-jd-income');
+}
+
+function selectJdIncome(n) {
+  jdState.income = n;
+  if (n === 7) {
+    jdState.special = 0;
+    updateProgressJd(4);
+    buildJdResult(); showScreen('screen-jd-result');
+  } else {
+    updateProgressJd(3);
+    showScreen('screen-jd-special');
+  }
+}
+
+function selectJdSpecial(n) {
+  jdState.special = n;
+  updateProgressJd(4);
+  buildJdResult(); showScreen('screen-jd-result');
+}
+
+function enableJdResult() {
+  setTimeout(() => {
+    const btn = document.getElementById('jdResultConfirmBtn');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+  }, 1500);
+}
+
+function showJdResult() {
+  buildJdResult();
+  showScreen('screen-jd-result');
+}
+
+// ===== 주담대 상품 블록 =====
+function jdDisclaimer() {
+  return `<div class="disclaimer">단, 실제 대출 가능 여부는 해당 금융기관에 서류를 제출하고 심사 후 확인할 수 있어요.<br>LTV, DTI, 신용점수 등에 따라 실제 한도는 달라질 수 있어요.</div>`;
+}
+
+function makeJdProduct(name, badges, details, tableHTML, noteHTML, officialUrl) {
+  const id = 'acc-jd-' + (++accordionCount);
+  const badgeHTML = badges.map(b => `<span class="badge badge-${b.type}">${b.text}</span>`).join('');
+  return `
+  <div class="product-card" id="${id}">
+    <div class="product-header" onclick="toggleAccordion('${id}')">
+      <div>
+        <div class="product-name">${name}</div>
+        <div class="product-badges">${badgeHTML}</div>
+      </div>
+      <div class="accordion-arrow">▾</div>
+    </div>
+    <div class="product-body">
+      ${details}
+      ${tableHTML ? `<div class="rate-table-title">산출금리표</div>${tableHTML}` : ''}
+      ${noteHTML ? `<div class="note-text" style="font-style:normal;">${noteHTML}</div>` : ''}
+      <a href="${officialUrl}" target="_blank" class="official-link">📋 공식 홈페이지 상세 조건 →</a>
+    </div>
+  </div>`;
+}
+
+function tableJdDimTol(isNewlywed) {
+  if (isNewlywed) {
+    return `<table class="rate-table">
+      <tr><th>소득수준(부부합산)</th><th>10년</th><th>15년</th><th>20년</th><th>30년</th></tr>
+      <tr><td>~2천만원↓</td><td>2.55%</td><td>2.65%</td><td>2.75%</td><td>2.80%</td></tr>
+      <tr><td>2천~4천만원</td><td>2.90%</td><td>3.00%</td><td>3.10%</td><td>3.15%</td></tr>
+      <tr><td>4천~7천만원</td><td>3.25%</td><td>3.35%</td><td>3.45%</td><td>3.50%</td></tr>
+      <tr><td>7천~8.5천만원</td><td>3.60%</td><td>3.70%</td><td>3.80%</td><td>3.85%</td></tr>
+    </table>`;
+  }
+  return `<table class="rate-table">
+    <tr><th>소득수준(부부합산)</th><th>10년</th><th>15년</th><th>20년</th><th>30년</th></tr>
+    <tr><td>~2천만원↓</td><td>2.85%</td><td>2.95%</td><td>3.05%</td><td>3.10%</td></tr>
+    <tr><td>2천~4천만원</td><td>3.20%</td><td>3.30%</td><td>3.40%</td><td>3.45%</td></tr>
+    <tr><td>4천~7천만원</td><td>3.55%</td><td>3.65%</td><td>3.75%</td><td>3.80%</td></tr>
+    <tr><td>7천~8.5천만원</td><td>3.90%</td><td>4.00%</td><td>4.10%</td><td>4.15%</td></tr>
+  </table>`;
+}
+
+function tableJdBogeum() {
+  return `<table class="rate-table">
+    <tr><th>상품/만기</th><th>10년</th><th>15년</th><th>20년</th><th>30년</th><th>40년</th><th>50년</th></tr>
+    <tr><td>아낌e보금자리론</td><td>4.05%</td><td>4.15%</td><td>4.20%</td><td>4.25%</td><td>4.30%</td><td>4.35%</td></tr>
+    <tr><td>t·u-보금자리론</td><td>4.15%</td><td>4.25%</td><td>4.30%</td><td>4.35%</td><td>4.40%</td><td>4.45%</td></tr>
+  </table>`;
+}
+
+function jdDimtolUdaeBox(isNewlywed) {
+  return `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:14px 16px;margin-top:14px;">
+    <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:8px;">🎯 디딤돌 우대금리 항목</div>
+    <div style="font-size:12px;color:#374151;line-height:2;">
+      ✅ 다자녀 3자녀↑: <strong>-0.7%p</strong> / 2자녀: <strong>-0.5%p</strong> / 1자녀: <strong>-0.3%p</strong><br>
+      ✅ 한부모가구 (연소득 6천↓): <strong>-0.5%p</strong><br>
+      ✅ 다문화·장애인·생애최초·신혼가구: <strong>-0.2%p</strong><br>
+      ✅ 청약저축 5년↑60회↑: <strong>-0.3%p</strong> / 10년↑120회↑: <strong>-0.4%p</strong> / 15년↑180회↑: <strong>-0.5%p</strong><br>
+      ✅ 전자계약 ('26.12.31까지): <strong>-0.1%p</strong><br>
+      ✅ 대출금액 30%↓ 신청: <strong>-0.1%p</strong><br>
+      ✅ 지방 준공후 미분양: <strong>-0.2%p</strong><br>
+      <span style="color:#6b7280;">※ 최저금리 1.5%${isNewlywed ? ' (생애최초 신혼 1.2%)' : ''}</span>
+    </div>
+  </div>`;
+}
+
+function jdUdaeBox() {
+  return `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:14px 16px;margin-top:14px;">
+    <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:8px;">🎯 보금자리론 우대금리 (최대 1.0%p 중복)</div>
+    <div style="font-size:12px;color:#374151;line-height:2;">
+      ✅ 전자약정·전자등기 (아낌e): <strong>-0.1%p</strong><br>
+      ✅ 저소득청년 (7천↓ + 만 40세↓): <strong>-0.1%p</strong><br>
+      ✅ 신혼가구 (7천↓ + 혼인 7년↓): <strong>-0.3%p</strong><br>
+      ✅ 신생아 출산가구 (7천↓ + 2년↓): <strong>-0.2%p</strong> ※신혼과 중복불가<br>
+      ✅ 다자녀 2자녀 (7천↓): <strong>-0.5%p</strong><br>
+      ✅ 다자녀 3자녀↑ (7천↓): <strong>-0.7%p</strong><br>
+      ✅ 한부모·장애인·다문화 (7천↓): <strong>-0.7%p</strong><br>
+      ✅ 미분양관리지역 미분양 아파트: <strong>-0.2%p</strong><br>
+      ✅ 전세사기피해자: <strong>-1.0%p</strong>
+    </div>
+  </div>`;
+}
+
+function productDimtol(badges, special) {
+  const isNewlywed = special === 3;
+  const limitText = special === 2 ? '최대 2.4억원 (생애최초)' :
+                    special === 3 ? '최대 3.2억원 (신혼가구)' :
+                    special === 5 ? '최대 3.2억원 (다자녀)' : '최대 2억원';
+  const incomeText = special === 3 ? '8.5천만원 이하' :
+                     special === 5 ? '7천만원 이하 (2자녀 기준)' : '6천만원 이하';
+  return makeJdProduct(
+    '내집마련 디딤돌 대출',
+    badges,
+    `<div class="detail-row"><span class="detail-key">대상</span><span class="detail-val">무주택 세대주, 순자산 5.11억원 이하</span></div>
+     <div class="detail-row"><span class="detail-key">소득 조건</span><span class="detail-val">부부합산 ${incomeText}</span></div>
+     <div class="detail-row"><span class="detail-key">주택 조건</span><span class="detail-val">전용 85㎡ 이하, 평가액 5억↓ (신혼·2자녀 6억↓)</span></div>
+     <div class="detail-row"><span class="detail-key">대출 한도</span><span class="detail-val">${limitText} (LTV 70%, 생애최초 80%)</span></div>
+     <div class="detail-row"><span class="detail-key">대출 기간</span><span class="detail-val">10 / 15 / 20 / 30년</span></div>`,
+    tableJdDimTol(isNewlywed),
+    '※ 지방 소재 주택 금리 0.2%p 차감' + jdDimtolUdaeBox(isNewlywed),
+    'https://nhuf.molit.go.kr/FP/FP05/FP0501/FP05010101.jsp'
+  );
+}
+
+function productBogeum(badges, special) {
+  const limitText = special === 2 ? '최대 4.2억원 (생애최초)' :
+                    special === 5 ? '최대 4억원 (다자녀)' : '최대 3.6억원';
+  return makeJdProduct(
+    '보금자리론',
+    badges,
+    `<div class="detail-row"><span class="detail-key">대상</span><span class="detail-val">무주택자 또는 1주택자 (3년 내 처분 조건)</span></div>
+     <div class="detail-row"><span class="detail-key">소득 조건</span><span class="detail-val">7천만원↓ (신혼 8.5천, 1자녀 9천, 2자녀↑ 1억)</span></div>
+     <div class="detail-row"><span class="detail-key">주택 조건</span><span class="detail-val">아파트·연립·단독 등 (주택가격 제한 없음)</span></div>
+     <div class="detail-row"><span class="detail-key">대출 한도</span><span class="detail-val">${limitText} (LTV 아파트 70%, 생애최초 80%)</span></div>
+     <div class="detail-row"><span class="detail-key">대출 기간</span><span class="detail-val">10·15·20·30·40·50년</span></div>
+     <div class="detail-row"><span class="detail-key">금리 유형</span><span class="detail-val">만기까지 고정금리 (2026.03.01 기준)</span></div>`,
+    tableJdBogeum(),
+    '※ 아낌e: 인터넷 전자약정·전자등기 시 0.1%p 저렴' + jdUdaeBox(),
+    'https://www.hf.go.kr/ko/sub01/sub01_01_01.do'
+  );
+}
+
+// 신생아 특례 디딤돌 금리표
+function tableJdShinengahDimtol() {
+  return `<table class="rate-table">
+    <tr><th>소득수준(부부합산)</th><th>10년</th><th>15년</th><th>20년</th><th>30년</th></tr>
+    <tr><td>~2천만원↓</td><td>1.80%</td><td>1.90%</td><td>2.00%</td><td>2.05%</td></tr>
+    <tr><td>2천~4천만원</td><td>2.15%</td><td>2.25%</td><td>2.35%</td><td>2.40%</td></tr>
+    <tr><td>4천~6천만원</td><td>2.40%</td><td>2.50%</td><td>2.60%</td><td>2.65%</td></tr>
+    <tr><td>6천~8.5천만원</td><td>2.65%</td><td>2.75%</td><td>2.85%</td><td>2.90%</td></tr>
+    <tr><td>8.5천~1억</td><td>2.90%</td><td>3.00%</td><td>3.10%</td><td>3.20%</td></tr>
+    <tr><td>1억~1.3억</td><td>3.20%</td><td>3.30%</td><td>3.40%</td><td>3.50%</td></tr>
+    <tr><td>(맞벌이)1.3억~1.5억</td><td>3.50%</td><td>3.60%</td><td>3.70%</td><td>3.80%</td></tr>
+    <tr><td>(맞벌이)1.5억~1.7억</td><td>3.85%</td><td>3.95%</td><td>4.05%</td><td>4.15%</td></tr>
+    <tr><td>(맞벌이)1.7억~2억</td><td>4.20%</td><td>4.30%</td><td>4.40%</td><td>4.50%</td></tr>
+  </table>`;
+}
+
+function productShinengahDimtol(badges) {
+  return makeJdProduct(
+    '신생아 특례 디딤돌 대출',
+    badges,
+    `<div class="detail-row"><span class="detail-key">대상</span><span class="detail-val">대출접수일 기준 2년 내 출산 무주택 세대주<br>(1주택자는 대환대출만 가능)</span></div>
+     <div class="detail-row"><span class="detail-key">소득 조건</span><span class="detail-val">부부합산 1.3억 이하 (맞벌이 2억 이하)</span></div>
+     <div class="detail-row"><span class="detail-key">주택 조건</span><span class="detail-val">전용면적 85㎡ 이하, 평가액 <strong>9억원 이하</strong></span></div>
+     <div class="detail-row"><span class="detail-key">대출 한도</span><span class="detail-val">최대 4억원 (LTV 70%, 생애최초 80%)</span></div>
+     <div class="detail-row"><span class="detail-key">금리 유형</span><span class="detail-val">특례금리 5년 적용 후 일반금리 전환<br>※ 추가 출산 시 자녀 1명당 5년 연장 (최장 15년)</span></div>
+     <div class="detail-row"><span class="detail-key">대출 기간</span><span class="detail-val">10년 / 15년 / 20년 / 30년</span></div>`,
+    tableJdShinengahDimtol(),
+    `※ 지방 소재 주택은 금리에서 0.2%p 차감
+     <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:14px 16px;margin-top:14px;">
+       <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:8px;">🎯 우대금리 항목</div>
+       <div style="font-size:12px;color:#374151;line-height:2;">
+         ✅ 청약저축 5년↑60회↑: <strong>-0.3%p</strong> / 10년↑120회↑: <strong>-0.4%p</strong> / 15년↑180회↑: <strong>-0.5%p</strong><br>
+         ✅ 부동산 전자계약 ('26.12.31까지): <strong>-0.1%p</strong><br>
+         ✅ 추가 출산 자녀 1명당: <strong>-0.2%p</strong><br>
+         ✅ 출생 후 2년 초과 미성년 자녀 1명당: <strong>-0.1%p</strong><br>
+         ✅ 대출금액 30% 이하 신청: <strong>-0.1%p</strong><br>
+         ✅ 지방 준공 후 미분양주택: <strong>-0.2%p</strong><br>
+         <span style="color:#6b7280;">※ 특례금리 종료 후 최저금리 1.2%</span>
+       </div>
+     </div>`,
+    'https://nhuf.molit.go.kr/FP/FP05/FP0503/FP05030801.jsp'
+  );
+}
+
+function jdNoResultHTML(msg) {
+  return `
+  <div class="no-result-box">
+    <div class="no-result-emoji">😔</div>
+    <div class="no-result-title">${msg || '해당 조건으로는<br>정책자금 주담대가 어려워요'}</div>
+    <div class="no-result-sub">일반 은행 주택담보대출을 알아보시거나<br>조건을 다시 확인해 보세요</div>
+  </div>`;
+}
+
+function jd1HouseNote() {
+  return `<div style="background:#fef3c7;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#92400e;">
+    ⚠️ <strong>1주택자</strong>는 보금자리론만 이용 가능해요. 기존 주택은 대출 실행일로부터 <strong>3년 이내 처분</strong> 조건이 있어요.
+  </div>`;
+}
+
+function buildJdResult() {
+  accordionCount = 0;
+  const el = document.getElementById('screen-jd-result');
+  const { housing, income, special } = jdState;
+  const isOneHouse = housing === 1;
+
+  // special: 1=일반, 2=생애최초, 3=신혼, 4=신생아, 5=다자녀
+
+  let html = `<button class="back-btn" onclick="goBackJd('screen-jd-special', 3)">‹ 다시 선택하기</button>
+  <div class="result-header">
+    <div class="result-header-emoji">🏗️</div>
+    <div class="result-header-title">주담대 맞춤 상품 결과</div>
+    <div class="result-header-sub">선택하신 조건에 맞는 정책자금 주담대를 안내해드려요</div>
+  </div>`;
+
+  const resetBtn = `<button class="reset-btn" onclick="resetJdApp()">🔄 처음부터 다시 하기</button>`;
+
+  // 소득 7 (2억 초과) → 불가
+  if (income === 7) {
+    html += jdNoResultHTML('소득 기준 초과로<br>정책자금 주담대 이용이 어려워요');
+    html += adSectionHTML() + resetBtn;
+    el.innerHTML = html;
+    return;
+  }
+
+  // 소득 6 (1.3억~2억, 맞벌이)
+  if (income === 6) {
+    if (special === 4) {
+      html += hlBox('✅ 가능 상품', '신생아 특례 디딤돌 대출', '맞벌이 신생아 가구 (1.3억~2억) 이용 가능');
+      html += jdDisclaimer();
+      if (isOneHouse) html += jd1HouseNote();
+      html += productShinengahDimtol([{type:'max',text:'★ 최대 4억'},{type:'rate',text:'★ 최저금리'}]);
+    } else {
+      html += jdNoResultHTML('1.3억 초과 소득은<br>신생아 특례 디딤돌만 가능해요');
+      html += `<div class="disclaimer">맞벌이 가구로 신생아(2년 이내 출산)가 있으시면 신생아 특례 디딤돌 대출 이용이 가능해요.</div>`;
+    }
+    html += adSectionHTML() + resetBtn;
+    el.innerHTML = html;
+    return;
+  }
+
+  // 소득 5 (1억~1.3억)
+  if (income === 5) {
+    if (special === 4) {
+      html += hlBox('✅ 가능 상품', '신생아 특례 디딤돌 대출', '소득 1억~1.3억 신생아 가구 이용 가능');
+      html += jdDisclaimer();
+      if (isOneHouse) html += jd1HouseNote();
+      html += productShinengahDimtol([{type:'max',text:'★ 최대 4억'},{type:'rate',text:'★ 최저금리'}]);
+    } else {
+      html += jdNoResultHTML('소득 1억 초과는<br>신생아 특례 디딤돌만 가능해요');
+      html += `<div class="disclaimer">신생아(2년 이내 출산)가 있으시면 신생아 특례 디딤돌 대출 이용이 가능해요.</div>`;
+    }
+    html += adSectionHTML() + resetBtn;
+    el.innerHTML = html;
+    return;
+  }
+
+  // ── 소득 1~4 ──
+
+  // 가능 상품 판별
+  const canShinengahDimtol = !isOneHouse && special === 4; // 신생아 특례 (소득 1~4 모두)
+  const canDimtolNormal = !isOneHouse && income === 1 && special !== 4;
+  const canDimtolFirst = !isOneHouse && income === 1 && special === 2;
+  const canDimtolNewlywed = !isOneHouse && (income <= 3) && special === 3;
+  const canDimtolMulti = !isOneHouse && income <= 2 && special === 5;
+  const canDimtol = canDimtolNormal || canDimtolFirst || canDimtolNewlywed || canDimtolMulti || (income === 1 && !isOneHouse && special !== 4);
+
+  const canBogeum = (
+    income <= 2 ||
+    (income === 3 && (special === 3 || special === 4 || special === 5)) ||
+    (income === 4 && (special === 4 || special === 5))
+  );
+
+  if (!canShinengahDimtol && !canDimtol && !canBogeum) {
+    html += jdNoResultHTML('선택하신 조건으로는<br>정책자금 주담대가 어려워요');
+    html += adSectionHTML() + resetBtn;
+    el.innerHTML = html;
+    return;
+  }
+
+  // 상단 하이라이트 박스
+  if (canShinengahDimtol) {
+    html += hlBox('📉 최저금리', '신생아 특례 디딤돌 대출', '특례금리 1.8% ~ 4.5% (5년간 적용)');
+    html += hlBox('💰 최대한도', '신생아 특례 디딤돌 대출', '최대 4억원 (평가액 9억 이하)');
+  } else if (canDimtol && canBogeum) {
+    html += hlBox('📉 최저금리', '내집마련 디딤돌 대출', '보금자리론보다 금리 낮은 편이에요');
+    html += hlBox('💰 최대한도', '보금자리론', '최대 3.6억 ~ 4.2억원 (조건별 상이)');
+  } else if (canDimtol) {
+    html += hlBox('✅ 추천 상품', '내집마련 디딤돌 대출', special === 2 ? '생애최초 최대 2.4억 / 금리 2.85%~' : special === 3 ? '신혼 최대 3.2억 / 금리 2.55%~' : '최대 2억 / 금리 2.85%~');
+  } else if (canBogeum) {
+    html += hlBox('✅ 추천 상품', '보금자리론', '최대 3.6억 ~ 4.2억원 / 고정금리');
+    html += hlBox('📋 금리 안내', '보금자리론 (고정금리)', '연 4.05% ~ 4.45% (우대금리 별도)');
+  }
+
+  html += jdDisclaimer();
+  if (isOneHouse) html += jd1HouseNote();
+
+  // 상품 카드 출력
+  if (canShinengahDimtol) {
+    html += productShinengahDimtol([{type:'max',text:'★ 최대 4억'},{type:'rate',text:'★ 특례금리'}]);
+  }
+
+  if (canDimtol) {
+    const db = [];
+    if (!canBogeum) db.push({type:'rate',text:'★ 최저금리'});
+    if (special === 2) db.push({type:'max',text:'★ 생애최초 한도↑'});
+    if (special === 3) db.push({type:'max',text:'★ 신혼 한도↑'});
+    if (special === 5) db.push({type:'max',text:'★ 다자녀 한도↑'});
+    html += productDimtol(db, special);
+  }
+
+  if (canBogeum) {
+    const bb = [{type:'max',text:'★ 최대한도'}];
+    if (!canDimtol && !canShinengahDimtol) bb.push({type:'rate',text:'★ 유일한 선택지'});
+    html += productBogeum(bb, special);
+  }
+
+  html += adSectionHTML() + resetBtn;
+  el.innerHTML = html;
+}
+
+
+function resetJdApp() {
+  jdState = { housing: null, income: null, special: null };
+  resetProgress();
+  showScreen('screen-intro');
+  const btn = document.getElementById('jdResultConfirmBtn');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed'; }
 }
 
 function updateProgress(step) {
@@ -1010,7 +1733,7 @@ function selectIncome(n) {
     state.age = null;
     state.special = null;
     updateProgress(5);
-    showScreen('screen-coupang');
+    buildResult(); showScreen('screen-result');
   } else {
     updateProgress(3);
     showScreen('screen-age');
@@ -1026,7 +1749,7 @@ function selectAge(n) {
 function selectSpecial(n) {
   state.special = n;
   updateProgress(5);
-  showScreen('screen-coupang');
+  buildResult(); showScreen('screen-result');
 }
 
 function enableResult() {
@@ -1127,9 +1850,9 @@ function productCheongnyeon(badges) {
   return makeProduct(
     '청년전용 버팀목 전세자금대출',
     badges,
-    `<div class="detail-row"><span class="detail-key">주택 조건</span><span class="detail-val">전용면적 85㎡ 이하</span></div>
+    `<div class="detail-row"><span class="detail-key">주택 조건</span><span class="detail-val">전용면적 85㎡ 이하 (만 25세 미만 단독세대주는 60㎡ 이하)</span></div>
      <div class="detail-row"><span class="detail-key">보증금 조건</span><span class="detail-val">3억원 이하</span></div>
-     <div class="detail-row"><span class="detail-key">대출 한도</span><span class="detail-val">보증금 80% 범위 내 최대 2억원</span></div>`,
+     <div class="detail-row"><span class="detail-key">대출 한도</span><span class="detail-val">보증금 80% 범위 내 최대 1.5억원<br>※ 만 25세 미만 단독세대주는 최대 1.2억원</span></div>`,
     '산출금리표',
     table2col([['~2천만원↓','연2.2%'],['2천~4천만원','연2.5%'],['4천~6천만원','연2.9%'],['6천~7.5천만원','연3.3%']]),
     'https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020301.jsp'
@@ -1140,9 +1863,9 @@ function productCheongnyeon2ja(badges) {
   return makeProduct(
     '2자녀 조건의 청년전용 버팀목 전세자금대출',
     badges,
-    `<div class="detail-row"><span class="detail-key">주택 조건</span><span class="detail-val">전용면적 85㎡ 이하</span></div>
+    `<div class="detail-row"><span class="detail-key">주택 조건</span><span class="detail-val">전용면적 85㎡ 이하 (만 25세 미만 단독세대주는 60㎡ 이하)</span></div>
      <div class="detail-row"><span class="detail-key">보증금 조건</span><span class="detail-val">3억원 이하</span></div>
-     <div class="detail-row"><span class="detail-key">대출 한도</span><span class="detail-val">보증금 80% 범위 내 최대 2억원</span></div>`,
+     <div class="detail-row"><span class="detail-key">대출 한도</span><span class="detail-val">보증금 80% 범위 내 최대 1.5억원<br>※ 만 25세 미만 단독세대주는 최대 1.2억원</span></div>`,
     '산출금리표 (2자녀 기준, 3자녀 이상 -0.2% 추가)',
     table2col([['~2천만원↓','연1.7%'],['2천~4천만원','연2.0%'],['4천~6천만원','연2.4%'],['6천~7.5천만원','연2.8%']]),
     'https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020301.jsp'
@@ -1191,7 +1914,7 @@ function productSinhonbu(badges) {
     badges,
     `<div class="detail-row"><span class="detail-key">주택 조건</span><span class="detail-val">전용면적 85㎡ 이하</span></div>
      <div class="detail-row"><span class="detail-key">보증금 조건</span><span class="detail-val">수도권 4억 이하 / 수도권 외 3억 이하</span></div>
-     <div class="detail-row"><span class="detail-key">대출 한도</span><span class="detail-val">보증금 80% 범위 내 수도권 최대 3억원 / 수도권 외 최대 2억원</span></div>`,
+     <div class="detail-row"><span class="detail-key">대출 한도</span><span class="detail-val">보증금 80% 범위 내 수도권 최대 2.5억 / 수도권 외 최대 1.6억</span></div>`,
     '산출금리표',
     table5col([
       ['~2천만원↓','연1.9%','연2.0%','연2.1%','연2.2%'],
@@ -1217,8 +1940,12 @@ function productShinengah(badges) {
 }
 
 // Highlight boxes
-function hlBox(label, value) {
-  return `<div class="highlight-box"><div class="hl-label">${label}</div><div class="hl-value">${value}</div></div>`;
+function hlBox(label, productName, detail) {
+  return `<div class="highlight-box">
+    <div class="hl-label">${label}</div>
+    <div class="hl-product">${productName}</div>
+    <div class="hl-detail">${detail}</div>
+  </div>`;
 }
 
 const disclaimer = `<div class="disclaimer">단, 실제 대출 가능 여부는 해당 금융기관에 서류를 제출하고 심사 후 확인할 수 있어요.<br>최대한도와 최저금리 산정 시, 은행 일반 전세대출 상품은 제외하였어요.</div>`;
@@ -1267,7 +1994,7 @@ function buildResult() {
   // income=4 → special result
   if (income === 4) {
     html += `
-    ${hlBox('안내', '최근 2년 이내 신생아를 출산한 가구라면, <strong>신생아 특례 대출</strong>을 이용할 수 있어요. 조건에 해당되지 않는다면, 아쉽지만 은행 전월세대출만 가능해요.')}
+    ${hlBox('📢 안내', '소득 7.5천만원 초과 구간', '신생아 특례 대출만 가능해요.<br>조건 미해당 시 은행 전월세대출을 알아보세요.')}
     ${disclaimer}
     ${productShinengah([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}])}`;
     html += adSectionHTML() + resetBtnHTML();
@@ -1279,32 +2006,32 @@ function buildResult() {
   const key = `${income}-${age}-${special}`;
 
   if (key === '1-1-1') {
-    html += hlBox('최대한도','<strong>청년전용 버팀목 전세자금대출</strong> (최대 2억)이 유리해요.');
-    html += hlBox('최저금리','<strong>청년전용 버팀목 전세자금대출</strong> (2.2%~3.3%)을 추천해요.');
+    html += hlBox('💰 최대한도', '청년전용 버팀목 전세자금대출', '최대 1.5억원 (만 25세 미만은 1.2억원)');
+    html += hlBox('📉 최저금리', '청년전용 버팀목 전세자금대출', '금리 2.2% ~ 3.3%');
     html += disclaimer;
     html += productCheongnyeon([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}]);
     html += productIlban([]);
 
   } else if (key === '1-1-2') {
     html += `<div style="font-size:15px;font-weight:700;color:#1a56db;margin-bottom:10px;">💑 신혼부부인 경우</div>`;
-    html += hlBox('최대한도','<strong>신혼부부 버팀목 전세자금대출</strong> (최대 3억원)이 유리해요.');
-    html += hlBox('최저금리','<strong>신혼부부 + 청년전용 버팀목 전세자금대출</strong> (2.2%~3.3%)을 추천해요.');
+    html += hlBox('💰 최대한도', '신혼부부 버팀목 전세자금대출', '수도권 최대 2.5억 / 비수도권 최대 1.6억');
+    html += hlBox('📉 최저금리', '신혼부부 / 청년전용 버팀목 전세자금대출', '금리 2.2% ~ 3.3%');
     html += disclaimer;
     html += productSinhonbu([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}]);
     html += productCheongnyeon([{type:'rate',text:'★ 최저금리'}]);
     html += productIlban([]);
 
   } else if (key === '1-1-3') {
-    html += hlBox('최대한도','<strong>신생아 특례 버팀목 대출</strong> (최대 2.4억)이 유리해요.');
-    html += hlBox('최저금리','<strong>신생아 특례 버팀목 대출</strong> (1.6%~4.3%)을 추천해요.');
+    html += hlBox('💰 최대한도', '신생아 특례 버팀목 대출', '수도권·비수도권 최대 2.4억원');
+    html += hlBox('📉 최저금리', '신생아 특례 버팀목 대출', '금리 1.6% ~ 4.3%');
     html += disclaimer;
     html += productShinengah([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}]);
     html += productIlban([]);
     html += productCheongnyeon([]);
 
   } else if (key === '1-1-4') {
-    html += hlBox('최대한도','<strong>2자녀 조건의 일반 버팀목 전세자금대출</strong> (최대 1.6억)이 유리해요.');
-    html += hlBox('최저금리','<strong>2자녀 조건의 청년전용 버팀목 전세자금대출</strong> (1.7%~2.8%)이에요.');
+    html += hlBox('💰 최대한도', '2자녀 조건의 일반 버팀목 전세자금대출', '수도권 최대 2.5억 / 비수도권 최대 1.6억');
+    html += hlBox('📉 최저금리', '2자녀 조건의 청년전용 버팀목 전세자금대출', '금리 1.7% ~ 2.8% / 최대 1.5억원');
     html += disclaimer;
     html += productIlban2ja([{type:'max',text:'★ 최대한도'}]);
     html += productCheongnyeon2ja([{type:'rate',text:'★ 최저금리'}]);
@@ -1312,29 +2039,29 @@ function buildResult() {
     html += productIlban([]);
 
   } else if (key === '1-2-1') {
-    html += hlBox('최대한도','<strong>일반 버팀목 전세자금대출</strong> (최대 1.2억)이 유리해요.');
-    html += hlBox('최저금리','<strong>일반 버팀목 전세자금대출</strong> (2.7%~3.5%)을 추천해요.');
+    html += hlBox('💰 최대한도', '일반 버팀목 전세자금대출', '수도권 최대 1.2억 / 비수도권 최대 8천만원');
+    html += hlBox('📉 최저금리', '일반 버팀목 전세자금대출', '금리 2.7% ~ 3.5%');
     html += disclaimer;
     html += productIlban([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}]);
 
   } else if (key === '1-2-2') {
     html += `<div style="font-size:15px;font-weight:700;color:#1a56db;margin-bottom:10px;">💑 신혼부부인 경우</div>`;
-    html += hlBox('최대한도','<strong>신혼부부 버팀목 전세자금대출</strong> (수도권 최대 3억, 수도권 외 최대 2억)이 유리해요.');
-    html += hlBox('최저금리','<strong>신혼부부 버팀목 전세자금대출</strong> (2.2%~3.3%)을 추천해요.');
+    html += hlBox('💰 최대한도', '신혼부부 버팀목 전세자금대출', '수도권 최대 2.5억 / 비수도권 최대 1.6억');
+    html += hlBox('📉 최저금리', '신혼부부 버팀목 전세자금대출', '금리 2.2% ~ 3.3%');
     html += disclaimer;
     html += productSinhonbu([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}]);
     html += productIlban([]);
 
   } else if (key === '1-2-3') {
-    html += hlBox('최대한도','<strong>신생아 특례 버팀목 대출</strong> (최대 2.4억)이 유리해요.');
-    html += hlBox('최저금리','<strong>신생아 특례 버팀목 대출</strong> (1.6%~4.3%)을 추천해요.');
+    html += hlBox('💰 최대한도', '신생아 특례 버팀목 대출', '수도권·비수도권 최대 2.4억원');
+    html += hlBox('📉 최저금리', '신생아 특례 버팀목 대출', '금리 1.6% ~ 4.3%');
     html += disclaimer;
     html += productShinengah([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}]);
     html += productIlban([]);
 
   } else if (key === '1-2-4') {
-    html += hlBox('최대한도','<strong>2자녀 조건의 일반 버팀목 전세자금대출</strong> (수도권 최대 2.5억, 수도권 외 최대 1.6억)이 유리해요.');
-    html += hlBox('최저금리','<strong>2자녀 조건의 일반 버팀목 전세자금대출</strong> (2.2%~3.0%)이에요.');
+    html += hlBox('💰 최대한도', '2자녀 조건의 일반 버팀목 전세자금대출', '수도권 최대 2.5억 / 비수도권 최대 1.6억');
+    html += hlBox('📉 최저금리', '2자녀 조건의 일반 버팀목 전세자금대출', '금리 2.2% ~ 3.0%');
     html += disclaimer;
     html += productIlban2ja([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}]);
     html += productIlban([]);
@@ -1343,21 +2070,21 @@ function buildResult() {
     html += noResultHTML();
 
   } else if (key === '2-1-2') {
-    html += hlBox('최대한도','<strong>신혼부부 버팀목 전세자금대출</strong> (수도권 최대 3억, 수도권 외 최대 2억)이 유리해요.');
-    html += hlBox('최저금리','<strong>신혼부부 버팀목 전세자금대출</strong> (2.2%~3.3%)이에요.');
+    html += hlBox('💰 최대한도', '신혼부부 버팀목 전세자금대출', '수도권 최대 2.5억 / 비수도권 최대 1.6억');
+    html += hlBox('📉 최저금리', '신혼부부 버팀목 전세자금대출', '금리 2.2% ~ 3.3%');
     html += disclaimer;
     html += productSinhonbu([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}]);
     html += tossBox();
 
   } else if (key === '2-1-3') {
-    html += hlBox('최대한도','<strong>신생아 특례 버팀목 대출</strong> (최대 2.4억)이 유리해요.');
-    html += hlBox('최저금리','<strong>신생아 특례 버팀목 대출</strong> (1.6%~4.3%)이에요.');
+    html += hlBox('💰 최대한도', '신생아 특례 버팀목 대출', '수도권·비수도권 최대 2.4억원');
+    html += hlBox('📉 최저금리', '신생아 특례 버팀목 대출', '금리 1.6% ~ 4.3%');
     html += disclaimer;
     html += productShinengah([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}]);
 
   } else if (key === '2-1-4') {
-    html += hlBox('최대한도','<strong>2자녀 조건의 일반 버팀목 전세자금대출</strong> (수도권 최대 2.5억, 수도권 외 최대 1.6억)이 유리해요.');
-    html += hlBox('최저금리','<strong>2자녀 조건의 청년전용 버팀목 전세자금대출</strong> (1.7%~2.8%)이에요.');
+    html += hlBox('💰 최대한도', '2자녀 조건의 일반 버팀목 전세자금대출', '수도권 최대 2.5억 / 비수도권 최대 1.6억');
+    html += hlBox('📉 최저금리', '2자녀 조건의 청년전용 버팀목 전세자금대출', '금리 1.7% ~ 2.8% / 최대 1.5억원');
     html += disclaimer;
     html += productIlban2ja([{type:'max',text:'★ 최대한도'}]);
     html += productCheongnyeon2ja([{type:'rate',text:'★ 최저금리'}]);
@@ -1366,20 +2093,20 @@ function buildResult() {
     html += noResultHTML();
 
   } else if (key === '2-2-2') {
-    html += hlBox('최대한도','<strong>신혼부부 버팀목 전세자금대출</strong> (수도권 최대 3억, 수도권 외 최대 3억)이 유리해요.');
-    html += hlBox('최저금리','<strong>신혼부부 버팀목 전세자금대출</strong> (2.2%~3.3%)이에요.');
+    html += hlBox('💰 최대한도', '신혼부부 버팀목 전세자금대출', '수도권 최대 2.5억 / 비수도권 최대 1.6억');
+    html += hlBox('📉 최저금리', '신혼부부 버팀목 전세자금대출', '금리 2.2% ~ 3.3%');
     html += disclaimer;
     html += productSinhonbu([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}]);
 
   } else if (key === '2-2-3') {
-    html += hlBox('최대한도','<strong>신생아 특례 버팀목 대출</strong> (최대 2.4억)이 유리해요.');
-    html += hlBox('최저금리','<strong>신생아 특례 버팀목 대출</strong> (1.6%~4.3%)이에요.');
+    html += hlBox('💰 최대한도', '신생아 특례 버팀목 대출', '수도권·비수도권 최대 2.4억원');
+    html += hlBox('📉 최저금리', '신생아 특례 버팀목 대출', '금리 1.6% ~ 4.3%');
     html += disclaimer;
     html += productShinengah([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}]);
 
   } else if (key === '2-2-4') {
-    html += hlBox('최대한도','<strong>2자녀 조건의 일반 버팀목 전세자금대출</strong> (수도권 최대 2.5억, 수도권 외 최대 1.6억)이 유리해요.');
-    html += hlBox('최저금리','<strong>2자녀 조건의 일반 버팀목 전세자금대출</strong> (2.2%~3.0%)이에요.');
+    html += hlBox('💰 최대한도', '2자녀 조건의 일반 버팀목 전세자금대출', '수도권 최대 2.5억 / 비수도권 최대 1.6억');
+    html += hlBox('📉 최저금리', '2자녀 조건의 일반 버팀목 전세자금대출', '금리 2.2% ~ 3.0%');
     html += disclaimer;
     html += productIlban2ja([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}]);
 
@@ -1387,15 +2114,15 @@ function buildResult() {
     html += noResultHTML();
 
   } else if (key === '3-1-2') {
-    html += hlBox('최대한도','<strong>신혼부부 버팀목 전세자금대출</strong> (수도권 최대 3억, 수도권 외 최대 2억)이 유리해요.');
-    html += hlBox('최저금리','<strong>신혼부부 버팀목 전세자금대출</strong> (2.2%~3.3%)이에요.');
+    html += hlBox('💰 최대한도', '신혼부부 버팀목 전세자금대출', '수도권 최대 2.5억 / 비수도권 최대 1.6억');
+    html += hlBox('📉 최저금리', '신혼부부 버팀목 전세자금대출', '금리 2.2% ~ 3.3%');
     html += disclaimer;
     html += productSinhonbu([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}]);
     html += productCheongnyeon([]);
 
   } else if (key === '3-1-3') {
-    html += hlBox('최대한도','<strong>신생아 특례 버팀목 대출</strong> (최대 2.4억)이 유리해요.');
-    html += hlBox('최저금리','<strong>신생아 특례 버팀목 대출</strong> (1.6%~4.3%)이에요.');
+    html += hlBox('💰 최대한도', '신생아 특례 버팀목 대출', '수도권·비수도권 최대 2.4억원');
+    html += hlBox('📉 최저금리', '신생아 특례 버팀목 대출', '금리 1.6% ~ 4.3%');
     html += disclaimer;
     html += productShinengah([{type:'max',text:'★ 최대한도'},{type:'rate',text:'★ 최저금리'}]);
 
@@ -1411,12 +2138,92 @@ function buildResult() {
 
 function resetApp() {
   state = { housing: null, income: null, age: null, special: null };
-  updateProgress(1);
+  resetProgress();
   showScreen('screen-intro');
-  document.getElementById('progressFill').style.width = '0%';
   const btn = document.getElementById('resultConfirmBtn');
   if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed'; }
 }
+
+// ===== PWA 설치 로직 =====
+let deferredPrompt = null;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+// 이미 설치된 경우 배너 안 보임
+if (!isInStandaloneMode) {
+  if (isIOS) {
+    // iOS: 3초 후 안내 모달 표시
+    setTimeout(() => {
+      document.getElementById('iosModal').classList.add('show');
+    }, 3000);
+  } else {
+    // 안드로이드: beforeinstallprompt 이벤트 감지
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      setTimeout(() => {
+        document.getElementById('pwaBanner').classList.add('show');
+      }, 3000);
+    });
+  }
+}
+
+document.getElementById('pwaInstallBtn')?.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('pwaBanner').classList.remove('show');
+});
+
+document.getElementById('pwaDismissBtn')?.addEventListener('click', () => {
+  document.getElementById('pwaBanner').classList.remove('show');
+});
+
+function closeIosModal() {
+  document.getElementById('iosModal').classList.remove('show');
+}
+
+// 서비스워커 등록
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+  });
+}
 </script>
+
+<!-- PWA 설치 배너 (안드로이드) -->
+<div class="pwa-banner" id="pwaBanner">
+  <div class="pwa-banner-icon">🏠</div>
+  <div class="pwa-banner-text">
+    <div class="pwa-banner-title">앱으로 설치하기</div>
+    <div class="pwa-banner-desc">홈 화면에 추가하면<br>앱처럼 바로 실행할 수 있어요!</div>
+  </div>
+  <div class="pwa-banner-btns">
+    <button class="pwa-install-btn" id="pwaInstallBtn">설치하기</button>
+    <button class="pwa-dismiss-btn" id="pwaDismissBtn">나중에</button>
+  </div>
+</div>
+
+<!-- iOS 설치 안내 모달 -->
+<div class="ios-modal" id="iosModal">
+  <div class="ios-modal-box">
+    <div class="ios-modal-title">📱 홈 화면에 앱 추가하기</div>
+    <div class="ios-step">
+      <div class="ios-step-num">1</div>
+      <div class="ios-step-text">하단 가운데 <strong>공유 버튼 (□↑)</strong> 을 탭하세요</div>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">2</div>
+      <div class="ios-step-text">스크롤을 내려 <strong>"홈 화면에 추가"</strong> 를 탭하세요</div>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">3</div>
+      <div class="ios-step-text">오른쪽 위 <strong>"추가"</strong> 버튼을 탭하면 완료!</div>
+    </div>
+    <button class="ios-modal-close" onclick="closeIosModal()">확인했어요</button>
+  </div>
+</div>
+
 </body>
 </html>
